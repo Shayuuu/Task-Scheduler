@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Task Scheduler</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: aqua;
+    }
+
+
+    #taskInput {
+      width: 70%;
+    }
+
+    #taskList {
+      list-style: none;
+      padding: 0;
+    }
+
+    .task {
+      margin-bottom: 10px;
+    }
+
+    .task input[type="checkbox"] {
+      margin-right: 5px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Task Scheduler</h1>
+  <div>
+    <input type="text" id="taskInput" placeholder="Enter your task">
+    <button onclick="addTask()">Add Task</button>
+  </div>
+  <ul id="taskList"></ul>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      loadTasks();
+    });
+
+    function addTask() {
+      const taskInput = document.getElementById("taskInput");
+      const taskList = document.getElementById("taskList");
+
+      if (taskInput.value.trim() === "") {
+        alert("Task cannot be empty!");
+        return;
+      }
+
+      const task = {
+        id: new Date().getTime(),
+        text: taskInput.value,
+        completed: false
+      };
+
+      const tasks = getTasksFromLocalStorage();
+      tasks.push(task);
+      localStorage.setItem("tasks", JSON.stringify(tasks));
+
+      taskInput.value = ""; // Clear input field
+      displayTasks();
+    }
+
+    function displayTasks() {
+      const taskList = document.getElementById("taskList");
+      taskList.innerHTML = "";
+
+      const tasks = getTasksFromLocalStorage();
+
+      tasks.forEach(task => {
+        const listItem = document.createElement("li");
+        listItem.classList.add("task");
+
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.checked = task.completed;
+        checkbox.addEventListener("change", function() {
+          updateTaskStatus(task.id, this.checked);
+        });
+
+        const taskText = document.createElement("span");
+        taskText.innerText = task.text;
+
+        listItem.appendChild(checkbox);
+        listItem.appendChild(taskText);
+
+        taskList.appendChild(listItem);
+      });
+    }
+
+    function updateTaskStatus(taskId, completed) {
+      const tasks = getTasksFromLocalStorage();
+      const updatedTasks = tasks.map(task => {
+        if (task.id === taskId) {
+          task.completed = completed;
+        }
+        return task;
+      });
+
+      localStorage.setItem("tasks", JSON.stringify(updatedTasks));
+      displayTasks();
+    }
+
+    function getTasksFromLocalStorage() {
+      return JSON.parse(localStorage.getItem("tasks")) || [];
+    }
+
+    function loadTasks() {
+      displayTasks();
+    }
+  </script>
+
+</body>
+</html>
